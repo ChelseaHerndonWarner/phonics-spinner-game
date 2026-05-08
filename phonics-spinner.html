@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phonics Spinner Game – Interactive Sight Words & Phonics Practice</title>
+  <meta name="description" content="A free interactive sight word spinner game for early readers. Practice Dolch and Fry sight words with a fun spinning wheel. Great for teachers and reading tutors." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sage:        #6F9B7A;
+      --sage-bg:     #EAF3EC;
+      --sage-dark:   #4d7a5a;
+      --sage-border: #b0d0bc;
+      --blue:        #89AFC4;
+      --peach:       #E7B8A2;
+      --mustard:     #D8BE72;
+      --teal:        #7FAFA6;
+      --bg:          #FAFAF7;
+      --border:      #d4ddd8;
+      --text:        #2d4035;
+      --text-mid:    #5a7060;
+      --text-lt:     #90a898;
+    }
+
+    body {
+      font-family: 'Andika', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #app {
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 16px 14px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* ── HEADER ── */
+    .header { text-align: center; padding: 6px 0 2px; }
+    h1 {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      color: var(--text);
+      font-size: 28px;
+      letter-spacing: 0.2px;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-lt);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    /* ── CONTROL PANEL ── */
+    .panel {
+      background: var(--sage-bg);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: center;
+      width: 100%;
+      border: 1px solid var(--sage-border);
+    }
+    .panel-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .panel-group > label {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--text-mid);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .tab-row {
+      display: flex;
+      border-radius: 9px;
+      overflow: hidden;
+      border: 1px solid var(--sage-border);
+    }
+    .tab {
+      background: white;
+      border: none;
+      padding: 8px 16px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .tab:not(:last-child) { border-right: 1px solid var(--sage-border); }
+    .tab.active { background: var(--sage); color: white; }
+    .tab:hover:not(.active) { background: #f0f7f2; }
+
+    select {
+      background: white;
+      border: 1px solid var(--sage-border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-family: 'Andika', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      min-width: 180px;
+    }
+    select:disabled { background: #f5f5f5; color: #bbb; cursor: not-allowed; }
+
+    .badge {
+      background: white;
+      color: var(--text-mid);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--sage-border);
+      font-family: 'Quicksand', sans-serif;
+      align-self: center;
+      white-space: nowrap;
+    }
+
+    .mute-btn {
+      background: white;
+      border: 1px solid var(--sage-border);
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 16px;
+      cursor: pointer;
+      line-height: 1;
+      align-self: center;
+      transition: background 0.1s;
+    }
+    .mute-btn:hover { background: #f0f7f2; }
+
+    /* ── ACTION BUTTONS ── */
+    .chips-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.1s, background 0.1s;
+    }
+    .btn:hover { transform: scale(1.03); background: var(--sage-bg); }
+    .btn.clr { color: #7a4545; border-color: #d8bcbc; }
+    .btn.clr:hover { background: #fdf2f2; }
+
+    /* ── WORD BANK ── */
+    .word-bank-wrap { width: 100%; }
+    .word-bank-wrap > label {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--text-mid);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: block;
+      margin-bottom: 5px;
+      padding-left: 2px;
+    }
+    .word-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      width: 100%;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 10px;
+      background: var(--sage-bg);
+      border-radius: 10px;
+      border: 1px solid var(--sage-border);
+    }
+    .chip {
+      background: white;
+      color: var(--text);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 14px;
+      font-family: 'Andika', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+      border: 2px solid var(--border);
+    }
+    .chip:hover { border-color: var(--sage); transform: scale(1.05); }
+    .chip.on-wheel {
+      background: #e4efe7;
+      color: var(--sage-dark);
+      border: 2px solid var(--sage);
+      box-shadow: 0 0 0 2px rgba(111,155,122,0.18);
+    }
+    .empty-chips {
+      color: var(--text-lt);
+      font-family: 'Quicksand', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      font-style: italic;
+      padding: 10px;
+    }
+
+    /* ── WHEEL ── */
+    .wheel-area {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .pointer {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 28px solid var(--mustard);
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+      z-index: 10;
+    }
+    #canvas {
+      border-radius: 50%;
+      box-shadow: 0 6px 28px rgba(78,120,90,0.2), 0 2px 8px rgba(0,0,0,0.08);
+      display: block;
+    }
+
+    /* ── SPIN BUTTON ── */
+    .spin-btn {
+      background: var(--sage);
+      border: none;
+      border-radius: 50px;
+      padding: 14px 52px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(111,155,122,0.38);
+      transition: transform 0.1s, background 0.1s;
+      letter-spacing: 0.5px;
+    }
+    .spin-btn:hover { transform: scale(1.04); background: var(--sage-dark); }
+    .spin-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    /* ── WINNER BANNER ── */
+    .winner-banner {
+      display: none;
+      background: var(--sage);
+      border-radius: 14px;
+      padding: 18px 28px;
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    .winner-banner p {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      color: white;
+      font-size: 18px;
+    }
+    .winner-banner .big-word {
+      font-family: 'Andika', sans-serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.1;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(40,60,45,0.4);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 22px;
+      overflow: hidden;
+      width: 360px;
+      max-width: 94vw;
+      box-shadow: 0 16px 56px rgba(0,0,0,0.2);
+      animation: popIn 0.22s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.82); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .modal-header {
+      background: var(--sage);
+      padding: 16px 24px;
+    }
+    .modal-header p {
+      color: white;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+    }
+    .modal-body {
+      padding: 28px 24px 24px;
+      text-align: center;
+    }
+    .modal-word {
+      font-family: 'Andika', sans-serif;
+      font-size: 72px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.05;
+      margin-bottom: 6px;
+    }
+    .modal-prompt {
+      font-size: 15px;
+      color: var(--text-mid);
+      margin-bottom: 24px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 600;
+    }
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .modal-keep {
+      background: white;
+      border: 2px solid var(--sage-border);
+      border-radius: 10px;
+      padding: 11px 24px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .modal-keep:hover { background: var(--sage-bg); }
+    .modal-remove {
+      background: #b05858;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 24px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .modal-remove:hover { background: #8a3e3e; }
+
+    /* ── CONFETTI ── */
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+      display: none;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 10px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 11px;
+      color: var(--text-lt);
+      text-align: center;
+      padding-bottom: 16px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      h1 { font-size: 22px; }
+      .tab { padding: 7px 11px; font-size: 12px; }
+      select { min-width: 140px; }
+      .modal-word { font-size: 56px; }
+      #canvas { width: 300px; height: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div id="app">
+
+  <div class="header">
+    <h1>Phonics Spinner Game</h1>
+    <div class="subtitle">Interactive Sight Words &amp; Phonics Practice</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-group">
+      <label>Word List</label>
+      <div class="tab-row">
+        <button class="tab active" id="tabFry"     onclick="switchTab('fry')">Fry</button>
+        <button class="tab"        id="tabDolch"   onclick="switchTab('dolch')">Dolch</button>
+        <button class="tab"        id="tabPhonics" onclick="switchTab('phonics')">Phonics Patterns</button>
+      </div>
+    </div>
+    <div class="panel-group">
+      <label>Level</label>
+      <select id="levelSelect" onchange="loadWords()"></select>
+    </div>
+    <span class="badge" id="wheelCount">0 on wheel</span>
+    <button class="mute-btn" id="muteBtn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+  </div>
+
+  <div class="chips-row">
+    <button class="btn" onclick="selectAll()">Select All</button>
+    <button class="btn" onclick="selectNone()">Deselect All</button>
+    <button class="btn clr" onclick="clearWheel()">Clear Wheel</button>
+  </div>
+
+  <div class="word-bank-wrap">
+    <label>Word Bank — tap a word to add or remove it from the wheel</label>
+    <div class="word-chips" id="wordChips"></div>
+  </div>
+
+  <div class="wheel-area">
+    <div class="pointer"></div>
+    <canvas id="canvas" width="340" height="340"></canvas>
+  </div>
+
+  <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN!</button>
+
+  <div class="winner-banner" id="winnerBanner">
+    <p>Last word standing!</p>
+    <div class="big-word" id="winnerWord"></div>
+    <button class="btn" style="margin-top:14px;background:white;" onclick="clearWheel()">Start Over</button>
+  </div>
+
+  <footer>Phonics Spinner Game &bull; Free classroom tool for early readers</footer>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header"><p>Read this word!</p></div>
+    <div class="modal-body">
+      <div class="modal-word" id="modalWord"></div>
+      <div class="modal-prompt">Can you read it?</div>
+      <div class="modal-btns">
+        <button class="modal-keep"   onclick="closeModal(false)">Keep It</button>
+        <button class="modal-remove" onclick="closeModal(true)">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── WORD DATA ─────────────────────────────────────────────────────────
+
+const DOLCH = {
+  'Pre-K': ['a','and','away','big','blue','can','come','down','find','for','funny','go','help','here','I','in','is','it','jump','little','look','make','me','my','not','one','play','red','run','said','see','the','three','to','two','up','we','where','yellow','you'],
+  'Kindergarten': ['all','am','are','at','ate','be','black','brown','but','came','did','do','eat','four','get','good','have','he','into','like','must','new','no','now','on','our','out','please','pretty','ran','ride','saw','say','she','so','soon','that','there','they','this','too','under','want','was','well','went','what','white','who','will','with','yes'],
+  'First Grade': ['after','again','an','any','as','ask','by','could','every','fly','from','give','going','had','has','her','him','his','how','just','know','let','live','may','of','old','once','open','over','put','round','some','stop','take','thank','them','then','think','walk','were','when'],
+  'Second Grade': ['always','around','because','been','before','best','both','buy','call','cold','does',"don't",'fast','first','five','found','gave','goes','green','its','made','many','off','or','pull','read','right','sing','sit','sleep','tell','their','these','those','upon','us','use','very','wash','which','why','wish','work','would','write','your'],
+  'Third Grade': ['about','better','bring','carry','clean','cut','done','draw','drink','eight','fall','far','full','got','grow','hold','hot','hurt','if','keep','kind','laugh','light','long','much','myself','never','only','own','pick','seven','shall','show','six','small','start','ten','today','together','try','warm']
+};
+
+const FRY = {
+  '1st 100 Words': ['a','about','all','an','and','are','as','at','be','been','but','by','called','can','come','could','day','did','do','down','each','find','first','for','from','get','go','had','has','have','he','her','him','his','how','I','if','in','into','is','it','like','long','look','made','make','many','may','more','my','no','not','now','number','of','oil','on','one','or','other','out','part','people','said','see','she','sit','so','some','than','that','the','their','them','then','there','these','they','this','time','to','two','up','use','was','water','way','we','were','what','when','which','who','will','with','words','would','write','you','your'],
+  '2nd 100 Words': ['after','again','air','also','America','animal','another','answer','any','around','ask','away','back','because','before','big','boy','came','change','different','does','end','even','follow','form','found','give','good','great','hand','help','here','home','house','just','kind','know','land','large','learn','letter','line','little','live','man','me','means','men','most','mother','move','much','must','name','need','new','off','old','only','our','over','page','picture','place','play','point','put','read','right','same','say','sentence','set','should','show','small','sound','spell','still','study','such','take','tell','things','think','three','through','too','try','turn','us','very','want','well','went','where','why','work','world','years'],
+  '3rd 100 Words': ['above','add','almost','along','always','began','begin','being','below','between','book','both','car','carry','children','city','close','country','cut',"don't",'earth','eat','enough','every','example','eyes','face','family','far','father','feet','few','food','four','girl','got','group','grow','hard','head','hear','high','idea','important','Indian',"it's",'keep','last','late','leave','left','let','life','light','list','might','mile','miss','mountains','near','never','next','night','often','once','open','own','paper','plant','real','river','run','saw','school','sea','second','seem','side','something','sometimes','song','soon','start','state','stop','story','talk','those','thought','together','took','tree','under','until','walk','watch','while','white','without','young'],
+  '4th 100 Words': ['across','against','area','become','best','better','birds','black','body','certain','cold','color','complete','covered','cried',"didn't",'dog','door','draw','during','early','easy','ever','fall','farm','fast','field','figure','fire','fish','five','friends','ground','happened','heard','himself','hold','horse','hours','however','hundred',"I'll",'king','knew','listen','low','map','mark','measure','money','morning','music','north','notice','numeral','order','passed','pattern','piece','plan','problem','products','pulled','questions','reached','red','remember','rock','room','seen','several','ship','short','since','sing','slowly','south','space','stand','step','sun','sure','table','today','told','top','toward','town','travel','true','unit','upon','usually','voice','vowel','war','waves','whole','wind','wood'],
+  '5th 100 Words': ['able','ago','am','among','ball','base','became','behind','boat','box','bring','brought','building','built','cannot','carefully','check','circle','class','clear','common','contain','correct','course','dark','decided','deep','done','dry','English','equation','explain','fact','feel','filled','finally','fine','fly','force','front','full','game','gave','government','green','half','heat','heavy','hot','inches','include','inside','island','known','language','less','machine','material','minutes','note','nothing','noun','object','ocean','oh','pair','person','plane','power','produce','quickly','ran','rest','road','round','rule','scientists','shape','shown','six','size','special','stars','stay','stood','street','strong','surface','system','ten','though','thousands','understand','verb','wait','warm','week','wheels','yes','yet'],
+  '6th 100 Words': ['anything','arms','beautiful','believe','beside','bill','blue','brother',"can't",'cause','cells','center','clothes','dance','describe','developed','difference','direction','discovered','distance','divided','drive','drop','edge','eggs','energy','Europe','exercise','farmers','felt','finished','flowers','forest','general','gone','grass','happy','heart','held','instruments','interest','job','kept','lay','legs','length','love','main','matter','meet','members','million','mind','months','moon','paint','paragraph','past','perhaps','picked','present','probably','race','rain','raised','ready','reason','record','region','represent','return','root','sat','shall','sign','simple','site','sky','soft','square','store','subject','suddenly','sum','summer','syllables','teacher','test','third','train','wall','weather','west','whether','wide','wild','window','winter','wish','written'],
+  '7th 100 Words': ['act','Africa','age','already','although','amount','angle','appear','baby','bear','beat','bed','bottom','bright','broken','build','buy','care','case','cat','century','consonant','copy',"couldn't",'count','cross','dictionary','died','dress','either','everyone','everything','exactly','factors','fight','fingers','floor','fraction','free','French','gold','hair','hill','hole','hope','ice','instead','iron','jumped','killed','lake','laughed','lead',"let's",'lot','melody','metal','method','middle','milk','moment','nation','natural','outside','per','phrase','poor','possible','pounds','pushed','quiet','quite','remain','result','ride','rolled','sail','scale','section','sleep','smiled','snow','soil','solve','someone','son','speak','speed','spring','stone','surprise','tall','temperature','themselves','tiny','trip','type','village','within','wonder'],
+  '8th 100 Words': ['alone','art','bad','bank','bit','break','brown','burning','business','captain','catch','caught','cents','child','choose','clean','climbed','cloud','coast','continued','control','cool','cost','decimal','desert','design','direct','drawing','ears','east','else','engine','England','equal','experiment','express','feeling','fell','flow','foot','garden','gas','glass','God','grew','history','human','hunting','increase','information','itself','joined','key','lady','law','least','lost','maybe','mouth','party','pay','period','plains','please','practice','president','received','report','ring','rise','row','save','seeds','sent','separate','serve','shouted','single','skin','statement','stick','straight','strange','students','suppose','symbols','team','touch','trouble','uncle','valley','visit','wear','whose','wire','woman','wrote','yard',"you're",'yourself'],
+  '9th 100 Words': ['addition','army','bell','belong','block','blood','blow','board','bones','branches','cattle','chief','compare','compound','consider','cook','corner','crops','crowd','current','doctor','dollars','eight','electric','elements','enjoy','entered','except','exciting','expect','famous','fit','flat','fruit','fun','guess','hat','hit','indicate','industry','insects','interesting','Japanese','lie','lifted','loud','major','mall','meat','mine','modern','movement','necessary','observe','park','particular','planets','poem','pole','position','process','property','provide','rather','rhythm','rich','safe','sand','science','sell','send','sense','seven','sharp','shoulder','sight','silent','soldiers','spot','spread','stream','string','suggested','supply','swim','terms','thick','thin','thus','tied','tone','trade','tube','value','wash',"wasn't",'weight','wife','wings',"won't"],
+  '10th 100 Words': ['action','actually','adjective','afraid','agreed','ahead','allow','apple','arrived','born','bought','British','capital','chance','chart','church','column','company','conditions','corn','cotton','cows','create','dead','deal','death','details','determine','difficult','division',"doesn't",'effect','entire','especially','evening','experience','factories','fair','fear','fig','forward','France','fresh','Greek','gun','hoe','huge',"isn't",'led','level','located','march','match','molecules','northern','nose','office','opposite','oxygen','plural','prepared','pretty','printed','radio','repeated','rope','rose','score','seat','settled','shoes','shop','similar','sir','sister','smell','solution','southern','steel','stretched','substances','suffix','sugar','tools','total','track','triangle','truck','underline','various','view','Washington',"we'll",'western','win','women','workers',"wouldn't",'wrong','yellow']
+};
+
+const PHONICS = { 'Coming Soon': [] };
+const DATA = { fry: FRY, dolch: DOLCH, phonics: PHONICS };
+
+// ── PASTEL WHEEL PALETTE ──────────────────────────────────────────────
+const WHEEL_COLORS = [
+  '#8FB89A','#89AFC4','#E0AA8A','#C8B060','#7FAFA6',
+  '#B0A8C8','#C49898','#7FAABC','#A8C8A0','#D4B070',
+  '#9AB8C8','#C8A098','#88B8A8','#B8A8D0','#90C0A0','#AABCCC'
+];
+const CONFETTI_COLORS = ['#8FB89A','#89AFC4','#E7B8A2','#D8BE72','#7FAFA6','#B0A8C8','#C49898'];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let currentTab   = 'fry';
+let wheelWords   = [];
+let currentAngle = 0;
+let spinning     = false;
+let pendingWord  = null;
+let muted        = false;
+
+// ── AUDIO ─────────────────────────────────────────────────────────────
+// Single AudioContext created on first user interaction (the SPIN click).
+let audioCtx = null;
+
+function ensureAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Browsers suspend context if the page loses focus; resume it.
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+// Tick sound: a very short, soft click using a brief noise burst.
+// We schedule individual ticks via the Web Audio clock for accuracy.
+let tickerNode   = null;   // ScriptProcessorNode / AudioWorklet (we use a simpler approach)
+let tickScheduler = null;  // setInterval handle for scheduling ticks
+let nextTickTime  = 0;     // AudioContext time for the next scheduled tick
+let tickInterval  = 0;     // ms between ticks (changes with spin speed)
+
+function scheduleOneTick(ctx, when) {
+  // Small band-pass filtered noise burst → sounds like a soft click/tick
+  const bufSize = Math.floor(ctx.sampleRate * 0.018); // 18 ms
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) {
+    // Exponential decay of white noise
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 6) * 0.35;
+  }
+
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+
+  // Bandpass filter centres the click around 1.2 kHz – wooden feel
+  const bp = ctx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = 1200;
+  bp.Q.value = 1.5;
+
+  const gain = ctx.createGain();
+  gain.gain.value = muted ? 0 : 0.55;
+
+  src.connect(bp);
+  bp.connect(gain);
+  gain.connect(ctx.destination);
+  src.start(when);
+}
+
+function startTicking(intervalMs) {
+  stopTicking();
+  if (muted) return;
+  const ctx = ensureAudioCtx();
+  nextTickTime = ctx.currentTime + 0.05;
+  tickInterval = intervalMs;
+
+  // Use a fast JS interval to keep scheduling ticks slightly ahead of time.
+  // This is the standard "look-ahead scheduler" pattern for Web Audio.
+  const LOOKAHEAD_MS  = 80;   // how far ahead we schedule
+  const SCHEDULER_MS  = 30;   // how often the JS scheduler runs
+
+  tickScheduler = setInterval(() => {
+    if (!audioCtx) return;
+    const ctx = audioCtx;
+    const lookAheadSec = LOOKAHEAD_MS / 1000;
+    while (nextTickTime < ctx.currentTime + lookAheadSec) {
+      if (!muted) scheduleOneTick(ctx, nextTickTime);
+      nextTickTime += tickInterval / 1000;
+    }
+  }, SCHEDULER_MS);
+}
+
+function updateTickInterval(intervalMs) {
+  tickInterval = intervalMs;
+  // No need to restart – the scheduler loop will pick up the new interval
+  // on its next cycle.
+}
+
+function stopTicking() {
+  if (tickScheduler) { clearInterval(tickScheduler); tickScheduler = null; }
+}
+
+function playCelebration() {
+  if (muted) return;
+  try {
+    const ctx = ensureAudioCtx();
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.12;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.08, t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      o.start(t); o.stop(t + 0.25);
+    });
+  } catch(e) {}
+}
+
+function toggleMute() {
+  muted = !muted;
+  document.getElementById('muteBtn').textContent = muted ? '🔇' : '🔊';
+  // If currently spinning and user unmutes, ticking will resume naturally
+  // because scheduleOneTick checks muted, but we need to restart the scheduler.
+  if (!muted && spinning) {
+    startTicking(tickInterval || 120);
+  }
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────
+let confParticles = [];
+let confAnimId = null;
+function launchConfetti() {
+  const cv = document.getElementById('confettiCanvas');
+  cv.style.display = 'block';
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  confParticles = [];
+  for (let i = 0; i < 80; i++) {
+    confParticles.push({
+      x: Math.random() * cv.width,
+      y: -10 - Math.random() * 80,
+      w: 6 + Math.random() * 6,
+      h: 8 + Math.random() * 6,
+      r: Math.random() * Math.PI * 2,
+      dr: (Math.random() - 0.5) * 0.15,
+      vx: (Math.random() - 0.5) * 2.5,
+      vy: 1.8 + Math.random() * 2.5,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      op: 1
+    });
+  }
+  if (confAnimId) cancelAnimationFrame(confAnimId);
+  animateConfetti();
+  setTimeout(() => {
+    if (confAnimId) { cancelAnimationFrame(confAnimId); confAnimId = null; }
+    cv.style.display = 'none';
+  }, 3000);
+}
+function animateConfetti() {
+  const cv = document.getElementById('confettiCanvas');
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  let alive = false;
+  confParticles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.r += p.dr; p.vy += 0.04;
+    if (p.y > cv.height * 0.72) p.op = Math.max(0, p.op - 0.025);
+    if (p.op > 0) alive = true;
+    ctx.save();
+    ctx.globalAlpha = p.op;
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.r);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+    ctx.restore();
+  });
+  if (alive) confAnimId = requestAnimationFrame(animateConfetti);
+  else { cv.style.display = 'none'; confAnimId = null; }
+}
+
+// ── TABS & WORDS ──────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  ['fry','dolch','phonics'].forEach(t => {
+    document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))
+      .classList.toggle('active', t === tab);
+  });
+  populateSelect();
+  loadWords();
+}
+function populateSelect() {
+  const sel = document.getElementById('levelSelect');
+  if (currentTab === 'phonics') {
+    sel.innerHTML = '<option disabled selected>Coming Soon...</option>';
+    sel.disabled = true;
+  } else {
+    sel.disabled = false;
+    sel.innerHTML = Object.keys(DATA[currentTab])
+      .map(k => `<option value="${k}">${k}</option>`).join('');
+  }
+}
+function loadWords() {
+  if (currentTab === 'phonics') {
+    document.getElementById('wordChips').innerHTML =
+      '<span class="empty-chips">Phonics pattern words coming soon!</span>';
+    return;
+  }
+  const level = document.getElementById('levelSelect').value;
+  const words = DATA[currentTab][level] || [];
+  const container = document.getElementById('wordChips');
+  container.innerHTML = '';
+  words.forEach(w => {
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (wheelWords.includes(w) ? ' on-wheel' : '');
+    chip.textContent = w;
+    chip.onclick = () => toggleWord(w, chip);
+    container.appendChild(chip);
+  });
+}
+function toggleWord(w, chip) {
+  if (wheelWords.includes(w)) {
+    wheelWords = wheelWords.filter(x => x !== w);
+    chip.classList.remove('on-wheel');
+  } else {
+    wheelWords.push(w);
+    chip.classList.add('on-wheel');
+  }
+  updateCount(); drawWheel();
+  document.getElementById('winnerBanner').style.display = 'none';
+}
+function selectAll() {
+  if (currentTab === 'phonics') return;
+  const level = document.getElementById('levelSelect').value;
+  const words = DATA[currentTab][level] || [];
+  words.forEach(w => { if (!wheelWords.includes(w)) wheelWords.push(w); });
+  updateCount(); drawWheel();
+  document.getElementById('winnerBanner').style.display = 'none';
+  document.querySelectorAll('.chip').forEach(c => {
+    if (wheelWords.includes(c.textContent)) c.classList.add('on-wheel');
+  });
+}
+function selectNone() {
+  const level = document.getElementById('levelSelect').value;
+  const words = currentTab !== 'phonics' ? (DATA[currentTab][level] || []) : [];
+  wheelWords = wheelWords.filter(w => !words.includes(w));
+  updateCount(); drawWheel();
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on-wheel'));
+}
+function clearWheel() {
+  wheelWords = []; updateCount(); drawWheel();
+  document.getElementById('winnerBanner').style.display = 'none';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on-wheel'));
+}
+function updateCount() {
+  document.getElementById('wheelCount').textContent = wheelWords.length + ' on wheel';
+}
+
+// ── DRAW WHEEL ────────────────────────────────────────────────────────
+function drawWheel(hi = -1) {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const cx = 170, cy = 170, r = 162;
+  ctx.clearRect(0, 0, 340, 340);
+
+  if (!wheelWords.length) {
+    ctx.fillStyle = '#EAF3EC';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#b0cabb'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#8aaa95';
+    ctx.font = '600 14px Quicksand, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Tap words above to add them', cx, cy - 10);
+    ctx.fillText('to the wheel!', cx, cy + 14);
+    return;
+  }
+
+  const slice = (Math.PI * 2) / wheelWords.length;
+  wheelWords.forEach((word, i) => {
+    const s = currentAngle + i * slice;
+    const e = s + slice;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, s, e); ctx.closePath();
+    ctx.fillStyle = hi === i ? '#e8d8a8' : WHEEL_COLORS[i % WHEEL_COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(s + slice / 2);
+    const textR = r * 0.62;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'white';
+    const n = wheelWords.length;
+    const fs = n > 30 ? 8 : n > 20 ? 10 : n > 12 ? 12 : n > 6 ? 14 : 16;
+    ctx.font = `700 ${fs}px Andika, sans-serif`;
+    ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 4;
+    ctx.fillText(word, textR, 0);
+    ctx.restore();
+  });
+
+  ctx.beginPath(); ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+  ctx.fillStyle = 'white'; ctx.fill();
+  ctx.strokeStyle = '#b0cabb'; ctx.lineWidth = 2; ctx.stroke();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────
+function showModal(word) {
+  pendingWord = word;
+  document.getElementById('modalWord').textContent = word;
+  document.getElementById('modalOverlay').classList.add('open');
+  launchConfetti();
+  playCelebration();
+}
+function closeModal(remove) {
+  document.getElementById('modalOverlay').classList.remove('open');
+  if (remove && pendingWord !== null) {
+    wheelWords = wheelWords.filter(w => w !== pendingWord);
+    document.querySelectorAll('.chip').forEach(c => {
+      if (c.textContent === pendingWord) c.classList.remove('on-wheel');
+    });
+    updateCount();
+    if (wheelWords.length === 1) {
+      drawWheel();
+      document.getElementById('winnerWord').textContent = wheelWords[0];
+      document.getElementById('winnerBanner').style.display = 'block';
+    } else {
+      drawWheel();
+    }
+  } else {
+    drawWheel();
+  }
+  pendingWord = null;
+}
+
+// ── SPIN ──────────────────────────────────────────────────────────────
+function spin() {
+  if (spinning) return;
+  if (!wheelWords.length) { alert('Tap some words to add them to the wheel first!'); return; }
+  if (wheelWords.length === 1) { showModal(wheelWords[0]); return; }
+
+  // ── KEY: create / resume AudioContext HERE, inside the click handler ──
+  ensureAudioCtx();
+
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('winnerBanner').style.display = 'none';
+
+  const total = (5 + Math.random() * 6) * Math.PI * 2;
+  const dur   = 3200 + Math.random() * 2000;
+  const t0    = performance.now();
+  const a0    = currentAngle;
+  const ease  = t => 1 - Math.pow(1 - t, 3);
+
+  // Start ticking fast (full speed)
+  const TICK_FAST = 55;   // ms between ticks at full speed
+  const TICK_SLOW = 280;  // ms between ticks when nearly stopped
+  startTicking(TICK_FAST);
+
+  // Track which segment the pointer is on so we tick on each new segment
+  let lastSegment = -1;
+
+  function frame(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    currentAngle = a0 + total * ease(p);
+
+    // Compute current segment under pointer
+    if (wheelWords.length > 1) {
+      const slice   = (Math.PI * 2) / wheelWords.length;
+      const norm    = ((-currentAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const adj     = (norm + Math.PI * 1.5) % (Math.PI * 2);
+      const segment = Math.floor(adj / slice) % wheelWords.length;
+
+      if (segment !== lastSegment) {
+        // New segment under the pointer → schedule an immediate tick
+        if (!muted && audioCtx) scheduleOneTick(audioCtx, audioCtx.currentTime + 0.01);
+        lastSegment = segment;
+      }
+    }
+
+    // Vary the background tick rate with spin speed
+    const speed = 1 - ease(p); // 1 = full speed, 0 = stopped
+    const newInterval = Math.round(TICK_FAST + (TICK_SLOW - TICK_FAST) * (1 - speed));
+    updateTickInterval(newInterval);
+
+    drawWheel();
+
+    if (p < 1) { requestAnimationFrame(frame); return; }
+
+    // Spin finished
+    stopTicking();
+    spinning = false;
+    document.getElementById('spinBtn').disabled = false;
+
+    const slice = (Math.PI * 2) / wheelWords.length;
+    const norm  = ((-currentAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const adj   = (norm + Math.PI * 1.5) % (Math.PI * 2);
+    const wi    = Math.floor(adj / slice) % wheelWords.length;
+    drawWheel(wi);
+    setTimeout(() => showModal(wheelWords[wi]), 320);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+populateSelect();
+loadWords();
+drawWheel();
+</script>
+</body>
+</html>
